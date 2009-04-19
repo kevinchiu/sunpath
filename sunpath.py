@@ -19,7 +19,7 @@ example:
 hours = {}
 altitudes = []
 azimuths = []
-p = re.compile('# Solar altitude and azimuth: (\-?\d*?\.\d*?)\s*?(\-?\d*?\.\d*?)')
+p = re.compile('# Solar altitude and azimuth: (\-?\d*?\.\d*)\s*?(\-?\d*?\.\d*)')
 
 class Usage(Exception):
 	def __init__(self, msg):
@@ -45,7 +45,7 @@ def main(argv=None):
 	
 def sunpath(month, day, time, timezone, lat, lon):
 	"""get the sun's position as [altitude, azumith]"""
-	command = './gensky ' + str(month) + ' ' + str(day) + ' ' + str(time) +  timezone + ' +s -a' + str(lat) + ' -o' + str(lon) 
+	command = './gensky ' + str(month) + ' ' + str(day) + ' ' + str(time) +  timezone + ' +s -a' + str(lat) + ' -o' + str(lon)
 	result = os.popen(command).read()
 	print result
 	m = p.search(result)
