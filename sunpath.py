@@ -54,7 +54,7 @@ def sunpath(month, day, time, timezone, lat, lon):
 		az = m.group(2)
 		altitudes.append(alt)
 		azimuths.append(az)
-		return [alt,az]
+		return [float(alt),float(az)]
 
 if __name__ == "__main__":
 	sys.exit(main())
