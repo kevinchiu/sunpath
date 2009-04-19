@@ -16,7 +16,7 @@ Month Day Timezone Lat Lon
 example:
 7 4 EDT 42 89
 '''
-
+hours = {}
 altitudes = []
 azimuths = []
 p = re.compile('# Solar altitude and azimuth: (\-?\d*?\.\d*?)\s*?(\-?\d*?\.\d*?)')
@@ -49,12 +49,10 @@ def main(argv=None):
 			altitudes.append(alt)
 			azimuths.append(az)
 			print m.group(0)
-			print alt
-			print az
-	print altitudes
-	print azimuths
+			hours[hour] = [alt, az]
+	print hours
 	exit(0)
-		
+	
 
 if __name__ == "__main__":
 	sys.exit(main())
