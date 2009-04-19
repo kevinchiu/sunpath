@@ -43,9 +43,9 @@ def main(argv=None):
 	print hours
 	exit(0)
 	
-def sunpath(month, day, time, zone, lat, lon):
+def sunpath(month, day, time, timezone, lat, lon):
 	"""get the sun's position as [altitude, azumith]"""
-	command = './gensky ' + month + ' ' + day + ' ' + time +  zone + ' +s -a' + lat + ' -o' + lon 
+	command = './gensky ' + month + ' ' + day + ' ' + time +  timezone + ' +s -a' + lat + ' -o' + lon 
 	result = os.popen(command).read()
 	print result
 	m = p.search(result)
