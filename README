@@ -3,3 +3,5 @@ usage:
 python sunpath.py Month Day Timezone Lat Lon
 example:
 python sunpath.py 7 4 EDT 42 89
+
+Sun paths: http://www.alternativephotography.com/articles/art108.html
