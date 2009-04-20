@@ -4,5 +4,9 @@ python sunpath.py Month Day Timezone Lat Lon
 example:
 python sunpath.py 7 4 EDT 42 89
 
-Sun paths: http://www.alternativephotography.com/articles/art108.html
+Sun paths:
+http://www.alternativephotography.com/articles/art108.html
 http://i.dailymail.co.uk/i/pix/2008/11/21/article-1088227-028C40CF000005DC-543_468x293_popup.jpg
+
+Sun position formula to invert for raster scan:
+http://www.astro.uio.no/~bgranslo/aares/calculate.html
