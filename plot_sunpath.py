@@ -1,76 +1,132 @@
 # Created by Daniel
 import sunpath
 import math
+import sys
+import os
+
+from svg_util import *
 
 
-def svg_header():
-	return '<?xml version="1.0" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n<svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">\n'
-
-def svg_footer():
-	return "</svg>"
-
-def circle(x,y,r, color="black"):
-	s='<circle cx="%s" cy="%s" r="%s" stroke="%s" fill="%s" stroke-width="1"/>\n' % (x, y, r, color, color)
-	return s	
-
-def semibold(x, y, size, text) :
-	return '<text x="%s" y="%s" font-family="\'MyriadPro-Semibold\'" font-size="%s">%s</text>\n' % (x,y, size,text)
-
-def draw(day,month,zone,lat,long, color):
-	x = 400;
-	y = 400;
+def draw_angles(x,y,zone,lat,lon,heading) :
 	svg = ""
-	for hour in range(24):
-		alt,az = sunpath.sunpath(month, day, str(hour) + ':00', zone, lat, lon)
-	
-		if alt < 0 : continue
-	
-		r = 200
-	
-		y1 = y - r * math.sin(alt/360.0 * math.pi * 2)
-		x1 = 20* hour
-	
-		svg += circle(x1,y1,3, color)
-		svg += semibold(x1+5,100,9,str(hour))
-	
-		az -= 90
-	
-		r = 200 + 5 * month
-	
-		x1 = x + 600 - r * math.cos(az/360* math.pi * 2)
-		y1 = y + r * math.sin(az/360* math.pi * 2)
-	
-		svg += circle(x1,y1,3, color)
+
+	for m in range(12) :
+		month = m+1
+		day = 1
+		p = []
+		
+		for hour in range(25):
+			alt,az = sunpath.sunpath(month, day, str(hour) + ':00', zone, lat, lon)
+			r = 200
+			if alt <0 : continue
+			py = r * math.sin(alt/360.0 * math.pi * 2)
+			px = az
+			
+			p.append([x+px,y-py])
+		svg += path(p,'rgb(%s,0,%s)' % ( m*20, 255-m*20) )
 
 	return svg
 
-svg = svg_header()
+
+def draw_day(x,y, zone,lat,lon) :
+	svg = ""
+
+	svg += semibold(x,y,12,"altitude")
+
+	for hour in range(25) :
+		svg += semibold(x+hour*20,100,9,str(hour))
 
 
-day = 18
-month = 6
-zone = "EDT"
-lat = 42
-lon = 71
+	for m in range(12) :
+		month = m+1
+		day = 1
+		p = []
+		
+		for hour in range(25):
+			alt,az = sunpath.sunpath(month, day, str(hour) + ':00', zone, lat, lon)
+			r = 200
+			if alt <0 : continue
+			py = r * math.sin(alt/360.0 * math.pi * 2)
+			px = 20*hour
+			
+			p.append([x+px,y-py])
+		svg += path(p,'rgb(%s,0,%s)' % ( m*20, 255-m*20) )
 
-x = 400
-y = 400
+	return svg
 
-svg += '<line x1="1000" y1="00" x2="1000" y2="800" style="stroke:rgb(200,200,200);stroke-width:1"/>\n'
-svg += '<line x1="400" y1="00" x2="400" y2="800" style="stroke:rgb(200,200,200);stroke-width:1"/>\n'
+def draw_heading(x,y, zone, lat,lon,heading) :
+	svg=""
+	r = 200
 
-svg += '<line x1="00" y1="400" x2="800" y2="400" style="stroke:rgb(200,200,200);stroke-width:1"/>\n'
-svg += '<line x1="00" y1="200" x2="800" y2="200" style="stroke:rgb(200,200,200);stroke-width:1"/>\n'
-
-
-svg += semibold(x,y,14,"altitude")
-svg += semibold(x+600,y,14,"azimuth")
-
-svg += draw(18,6,"EDT",42,71,"black")
-svg += draw(18,12,"EDT",42,71,"red")
-svg += draw(18,3,"EDT",42,71,"blue")
-svg += draw(18,9,"EDT",42,71,"green")
 	
-svg += svg_footer()
+	for m in range(12) :
+		r = 100 + m*10
+		month = m+1
+		day = 1
+		p = []
+		for hour in range(25) :
+			alt,az = sunpath.sunpath(month, day, str(hour) + ':00', zone, lat, lon)
+			
+			if ( alt < 0 ) : continue
+			
+			x1 = x - r * math.cos(az/360* math.pi * 2)
+			y1 = y + r * math.sin(az/360* math.pi * 2)
+			p.append( [x1,y1] )
+			#svg += circle(x1,y1,3)
+		svg += path(p,'rgb(%s,0,%s)' % ( m*20, 255-m*20) )
+	
 
-print svg
+	return svg
+	
+
+
+def main(argv=None) :
+	if len(sys.argv) != 4:
+		print "Usage:" + sys.argv[0] + "lat long heading" 
+		sys.exit(1)
+		
+	lat = sys.argv[1]
+	lon = sys.argv[2]
+	heading = sys.argv[3]
+	zone = "EDT"
+
+
+	svg = svg_header();
+		
+	# draw a grid
+
+	svg += line(0,500,1000,500,"rgb(20,20,20)")
+
+	for a in range(1,25) :
+		svg += line(500+a*20,0,500+a*20,500,"rgb(200,200,200)")
+		
+	
+	svg += line(500,0,500,1000,"rgb(20,20,20)")
+	svg += line(1000,0,1000,1000,"rgb(20,20,20)")
+	
+	# svg += line(1500,0,1500,1000,"rgb(200,200,200)")
+
+	svg += line(250,0,250,500,"rgb(200,200,200)")
+	svg += line(0,250,500,250,"rgb(200,200,200)")
+	
+
+
+	#svg += draw_day(500,500,zone,lat,lon)
+	
+	#svg += draw_heading(250,250,zone,lat,lon,heading)
+	
+	svg += draw_angles(250,250,zone,lat,lon,heading)
+	
+	svg += svg_footer()
+
+	print svg	
+
+
+if __name__ == "__main__":
+        sys.exit(main())
+
+
+
+
+
+
