@@ -3,82 +3,61 @@ import sunpath
 import math
 import sys
 import os
+import datetime
 
 from svg_util import *
 
 
-def draw_angles(x,y,zone,lat,lon,heading) :
+def convert_time(p) :
+	minutes = p* 24*60 # minutes per day
+	# convert seconds into hour:minute
+	m = minutes % 60
+	h = (minutes -m) / 60 
+	return '%s:%s' % (int(h),int(m))
+	
+def convert_date(day) :
+	d = datetime.date(2009, 1,1)
+	delta  = datetime.timedelta(days=day*365)
+	d = d+delta
+	return d.month, d.day
+
+
+### [date][time] [azimuth][altitude]
+
+def generate_table(width,height,zone, lat,lon,heading) :
+	pt = []
+	for x in range(width) :
+		month, day = convert_date(float(x)/float(width))
+		p=[]
+		for y in range(height) :
+			time = convert_time(float(y)/float(height))
+			
+			alt,az = sunpath.sunpath(month,day,time,zone,lat,lon)
+			p.append( [ az, math.sin(alt/360.0 * math.pi * 2) ] )	
+			#print month, day,time, "**&*", az, math.sin(alt/360.0 * math.pi * 2) 
+		pt.append(p)
+	return pt
+	
+def draw_angles(x,y,table) :
 	svg = ""
+	w = len(table)
+	h = len(table[0])
 
-	for m in range(12) :
-		month = m+1
-		day = 1
-		p = []
-		
-		for hour in range(25):
-			alt,az = sunpath.sunpath(month, day, str(hour) + ':00', zone, lat, lon)
-			r = 200
-			if alt <0 : continue
-			py = r * math.sin(alt/360.0 * math.pi * 2)
-			px = az
+	for date in range(w/2) : # only first 6 months
+		for time in range(h) :
+			az, alt = table[date][time]
+			if alt < 0 : continue
 			
-			p.append([x+px,y-py])
-		svg += path(p,'rgb(%s,0,%s)' % ( m*20, 255-m*20) )
+			px = x + az #float(time)/float(w) * 1000
+			py = y - 100*alt #alt*500
+			
+			
+			t = float(time) / float(h)
+			
+			svg += circle(px,py,3, 'rgb(%s,255,0)' % ( int( t*255.0) ) )
 
+	# sys.exit(1)
 	return svg
-
-
-def draw_day(x,y, zone,lat,lon) :
-	svg = ""
-
-	svg += semibold(x,y,12,"altitude")
-
-	for hour in range(25) :
-		svg += semibold(x+hour*20,100,9,str(hour))
-
-
-	for m in range(12) :
-		month = m+1
-		day = 1
-		p = []
-		
-		for hour in range(25):
-			alt,az = sunpath.sunpath(month, day, str(hour) + ':00', zone, lat, lon)
-			r = 200
-			if alt <0 : continue
-			py = r * math.sin(alt/360.0 * math.pi * 2)
-			px = 20*hour
-			
-			p.append([x+px,y-py])
-		svg += path(p,'rgb(%s,0,%s)' % ( m*20, 255-m*20) )
-
-	return svg
-
-def draw_heading(x,y, zone, lat,lon,heading) :
-	svg=""
-	r = 200
-
-	
-	for m in range(12) :
-		r = 100 + m*10
-		month = m+1
-		day = 1
-		p = []
-		for hour in range(25) :
-			alt,az = sunpath.sunpath(month, day, str(hour) + ':00', zone, lat, lon)
-			
-			if ( alt < 0 ) : continue
-			
-			x1 = x - r * math.cos(az/360* math.pi * 2)
-			y1 = y + r * math.sin(az/360* math.pi * 2)
-			p.append( [x1,y1] )
-			#svg += circle(x1,y1,3)
-		svg += path(p,'rgb(%s,0,%s)' % ( m*20, 255-m*20) )
-	
-
-	return svg
-	
-
 
 def main(argv=None) :
 	if len(sys.argv) != 4:
@@ -92,6 +71,7 @@ def main(argv=None) :
 
 
 	svg = svg_header();
+
 		
 	# draw a grid
 
@@ -110,13 +90,8 @@ def main(argv=None) :
 	svg += line(0,250,500,250,"rgb(200,200,200)")
 	
 
-
-	#svg += draw_day(500,500,zone,lat,lon)
-	
-	#svg += draw_heading(250,250,zone,lat,lon,heading)
-	
-	svg += draw_angles(250,250,zone,lat,lon,heading)
-	
+	table = generate_table(24,24,zone, lat, lon, heading)
+	svg += draw_angles(250,250,table)	
 	svg += svg_footer()
 
 	print svg	
