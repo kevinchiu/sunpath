@@ -39,17 +39,16 @@ def main(argv=None):
 	lat			= argv[4]
 	lon			= argv[5]
 	
-	for hour in range(1):
+	for hour in range(24):
 			hours[hour] = sunpath(month, day, str(hour) + ':00', zone, lat, lon)
 	print hours
 	exit(0)
 	
 def sunpath(month, day, time, timezone, lat, lon):
 	"""get the sun's position as [altitude, azumith]"""
-	command = ['./gensky', str(month), str(day), str(time) + timezone, '+s', '-a', str(lat), '-o', str(lon), '> ./temp_output']
-	os.popen(" ".join(command))
-	m = p.search(open('./temp_output', 'r').read())
-	os.remove('./temp_output')
+	command = ['./gensky', str(month), str(day), str(time) + timezone, '+s', '-a', str(lat), '-o', str(lon)]
+	temp_string = os.popen(" ".join(command)).read()
+	m = p.search(temp_string)
 	if m != None:
 		alt = m.group(1)
 		az = m.group(2)
