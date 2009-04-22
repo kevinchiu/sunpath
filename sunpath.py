@@ -47,8 +47,8 @@ def main(argv=None):
 def sunpath(month, day, time, timezone, lat, lon):
 	"""get the sun's position as [altitude, azumith]"""
 	command = ['./gensky', str(month), str(day), str(time) + timezone, '+s', '-a', str(lat), '-o', str(lon)]
-	temp_string = os.popen(" ".join(command)).read()
-	m = p.search(temp_string)
+	search_string = os.popen(" ".join(command)).read()
+	m = p.search(search_string)
 	if m != None:
 		alt = m.group(1)
 		az = m.group(2)
