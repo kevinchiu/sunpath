@@ -1,3 +1,5 @@
+Calculates the appearance of a solar traversal given a location on the Earth. Used as input for the Living Windows static lightfield project.
+
 usage:
 
 python sunpath.py Month Day Timezone Lat Lon
